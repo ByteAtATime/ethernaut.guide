@@ -1,0 +1,16 @@
+---
+import Collapsible from "./Collapsible.astro";
+---
+
+<Collapsible title="Learn more">
+    <h4>Key takeaways</h4>
+    <slot name="takeaways" />
+
+    <h4>Notable hacks</h4>
+    <slot name="hacks">
+        <p>Fortunately, there are no notable hacks for this challenge. However, the topics presented are still important to keep in mind.</p>
+    </slot>
+
+    <h4>Further Reading/Resources</h4>
+    <slot name="resources" />
+</Collapsible>

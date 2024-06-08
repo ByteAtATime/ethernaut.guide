@@ -1,0 +1,74 @@
+---
+title: "Challenge #5: Token"
+sidebar:
+    order: 5
+---
+
+import Hint from "@components/Hint.astro";
+import Solution from "@components/Solution.astro";
+import Conclusion from "@components/Conclusion.astro";
+
+In this challenge, you need to exploit the `Token` contract to gain more tokens than you should be allowed to have.
+
+## Hints
+
+<Hint index={1}>
+    The `Token` contract has a transfer function that allows token transfers between addresses. Look closely at the conditions and arithmetic operations in this function. How does it handle balances and overflows?
+</Hint>
+
+<Hint index={2}>
+    Notice how this contract is compiled with a Solidity version before 0.8.0. How do arithmetic operations behave in this version, and what vulnerabilities can arise from this behavior?
+</Hint>
+
+<Hint index={3}>
+    Consider the behavior of unsigned integers in previous versions of Solidity. What happens when an unsigned integer is decreased below zero? How does this affect the balances in the `Token` contract?
+</Hint>
+
+## Solution
+
+<Solution>
+    The `Token` contract's `transfer` function does not properly handle underflow conditions. Here's the relevant part of the contract:
+
+    ```solidity
+    function transfer(address _to, uint _value) public returns (bool) {
+        require(balances[msg.sender] >= _value);
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
+        return true;
+    }
+    ```
+
+    In Solidity versions before 0.8.0, arithmetic operations on unsigned integers do not revert on overflow or underflow. This means if `balances[msg.sender]` is less than `_value`, subtracting `_value` will underflow and wrap around to a very large number.
+
+    To exploit this, you can call the `transfer` function with a value greater than your current balance, causing an underflow and resulting in a large balance.
+
+    Here are the steps to exploit the contract:
+
+    1. Check your current balance with `token.balanceOf(yourAddress)`.
+    2. Call the `transfer` function with a value greater than your current balance, e.g., `await token.transfer(anyAddress, yourBalance + 1)`.
+
+    This will underflow your balance, giving you a large amount of tokens.
+</Solution>
+
+## Conclusion
+
+<Conclusion>
+    <Fragment slot="takeaways">
+        This challenge demonstrates the importance of handling integer underflow and overflow correctly in Solidity. Key takeaways include:
+
+        1. **Integer Overflow/Underflow**: Before Solidity 0.8.0, arithmetic operations did not revert on overflow or underflow, which could lead to serious vulnerabilities.
+        2. **SafeMath Library**: Always use libraries like OpenZeppelin's SafeMath to perform safe arithmetic operations that prevent overflow and underflow.
+        3. **Proper Validation**: Ensure all arithmetic operations are properly validated and consider edge cases where underflow or overflow could occur.
+
+        These lessons are crucial for developing secure smart contracts and preventing common vulnerabilities.
+    </Fragment>
+
+    <Fragment slot="hacks">
+        A famous example of an integer underflow exploit is the Proof of Weak Hands (PoWH) Ponzi scheme, where attackers drained the contract by exploiting an underflow vulnerability in the `approve` function.
+    </Fragment>
+
+    <Fragment slot="resources">
+        - [Solidity Documentation on Arithmetic Operations](https://docs.soliditylang.org/en/v0.8.0/control-structures.html#checked-or-unchecked-arithmetic) - This link provides information on arithmetic operations and how to handle them securely in Solidity 0.8.0 and later.
+        - [OpenZeppelin SafeMath](https://docs.openzeppelin.com/contracts/2.x/api/math) - A library that helps prevent overflow and underflow vulnerabilities by performing safe arithmetic operations.
+    </Fragment>
+</Conclusion>

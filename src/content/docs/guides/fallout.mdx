@@ -1,0 +1,71 @@
+---
+title: "Challenge #2: Fallout"
+sidebar:
+    order: 2
+---
+
+import Hint from "@components/Hint.astro";
+import Solution from "@components/Solution.astro";
+import Conclusion from "@components/Conclusion.astro";
+
+In this challenge, you need to claim ownership of the `Fallout` contract.
+
+## Hints
+
+<Hint index={1}>
+    A contract's constructor is a special function that is executed only once when the contract is deployed. It is used
+    to initialize the contract. Does the `Fallout` contract have a constructor? If so, what does it do?
+</Hint>
+
+<Hint index={2}>
+    This contract was compiled using version `0.6.x` of Solidity. In this version, constructors are defined as a
+    function with the same name as the contract. Did the author of this contract follow this convention? If not, what
+    implications does this have for the contract's initialization?
+</Hint>
+
+<Hint index={3}>
+    Consider the `Fal1out` function. Why is it named that way? Is it possible that this function was intended to be a
+    constructor but due to a typo or syntax issue, it’s now just a regular function? If you can call it, what can you do
+    with it?
+</Hint>
+
+## Solution
+
+<Solution>
+    The `Fallout` contract contains a function named `Fal1out`. This function appears to be intended as a constructor
+    but is misspelled. In older versions of Solidity, constructors were functions with the same name as the contract.
+    Due to the misspelling, `Fal1out` is treated as a regular public function.
+
+    To claim ownership of the contract, you simply need to call the `Fal1out` function. This function takes no
+    parameters and
+    sets the `owner` state variable to `msg.sender`. Once you've called this function, you'll be the owner of the
+    contract. Simple as that!
+</Solution>
+
+## Conclusion
+
+<Conclusion>
+    <Fragment slot="takeaways">
+        This challenge is essential for understanding several key concepts:
+
+        1. The importance of proper constructor syntax and naming conventions in Solidity. Mistakes in naming can lead
+        to security vulnerabilities.
+        2. Awareness of how language updates and syntax changes can affect smart contract security.
+        3. Understanding how to identify and exploit common pitfalls in contract initialization.
+
+        These lessons are foundational for securing smart contracts and avoiding common errors that can lead to
+        ownership issues.
+    </Fragment>
+
+    <Fragment slot="hacks">
+        The most notable hack in the real world is the `Rubixi` contract. This contract was formerly known as
+        `DynamicPyramid`, and hence the constructor function was named `DynamicPyramid`. When they underwent a rebranding,
+        they changed the contract name but forgot to update the constructor function. This allowed an attacker to call
+        the constructor function and take ownership of the contract.
+    </Fragment>
+
+    <Fragment slot="resources">
+        - [The Solidity Documentation on Constructors](https://docs.soliditylang.org/en/latest/contracts.html#constructors) - This link provides detailed
+        information on constructor functions and their proper usage.
+    </Fragment>
+</Conclusion>

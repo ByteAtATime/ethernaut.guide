@@ -1,0 +1,13 @@
+---
+import Collapsible from "./Collapsible.astro";
+
+type Props = {
+    index: number|string;
+}
+
+const {index} = Astro.props;
+---
+
+<Collapsible title={`Hint #${index}`}>
+    <slot />
+</Collapsible>

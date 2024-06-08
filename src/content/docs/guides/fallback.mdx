@@ -1,0 +1,66 @@
+---
+title: "Challenge #1: Fallback"
+sidebar:
+    order: 1
+---
+
+import Hint from "@components/Hint.astro";
+import Solution from "@components/Solution.astro";
+import Conclusion from "@components/Conclusion.astro";
+
+In this challenge, you have to take ownership of the `Fallback` contract.
+
+## Hints
+
+<Hint index={1}>
+    To take ownership, you have to set the `owner` field to your address. Is there any functions that set this? What are
+    the conditions to invoke those functions?
+
+    (Bonus hint: there are 2 ways, but one of them is really stupid).
+</Hint>
+
+<Hint index={2}>
+    The special `receive()` function is called when a contract receives a transaction without any data. This is
+    sometimes known as a fallback function (along with the function named `fallback()`).
+
+    This challenge is named "Fallback" for a reason. What can you do with the `receive()` function?
+</Hint>
+
+<Hint index="3">
+    There are two conditions to call the `receive()` function:
+    1. Your contribution amount must be greater than 0.
+    2. The amount of ether sent must be greater than 0.
+
+    How do you satisfy these conditions?
+</Hint>
+
+## Solution
+
+<Solution>
+    The `Fallback` contract has a `receive()` function that is called when it receives ether without any data. This
+    function sets the `owner` to `msg.sender`, but only when the player contributes a positive amount.
+
+    In order to send a contribution, you call the aptly-named `contribute()` function with a very small (&lt;0.001
+    ether) amount.
+
+    Then, we can send a transaction to the contract with a another small value. This will trigger the `receive()`
+    function, which will set the `owner` to our address.
+</Solution>
+
+## Conclusion
+
+<Conclusion>
+    <Fragment slot="takeaways">
+        This challenge is a good introduction to the Ethernaut challenges. There are a few things it introduces:
+
+        1. The `receive()` function, which is called when a contract receives ether without any data.
+        2. That you shouldn't allow anyone to take ownership of your contract without your consent.
+        3. Finding the right conditions to trigger a function.
+
+        These are all important concepts that you will see in future challenges.
+    </Fragment>
+
+    <Fragment slot="resources">
+        - [The Solidity Wiki](https://docs.soliditylang.org/en/latest/contracts.html#special-functions) - This link takes you to the Solidity documentation on special functions, which includes the `receive()` function.
+    </Fragment>
+</Conclusion>
